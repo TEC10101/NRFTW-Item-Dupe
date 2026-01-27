@@ -57,14 +57,12 @@ namespace Duplicator
     private static void RenderMenu(AppSettings settings)
     {
       Console.Clear();
-      Console.WriteLine("=== Duplicator ===");
-      Console.WriteLine();
-      Console.WriteLine($"Current Folder: {settings.FolderPath ?? "<not set>"}");
-      Console.WriteLine();
-      Console.WriteLine("F1 - Character");
-      Console.WriteLine("F5 - Realm");
-      Console.WriteLine("F9 - Update Folder Path");
-      Console.WriteLine("ESC/Q - Quit");
+      DrawHeader("=== Duplicator ===", null);
+      DrawLineAt(2, $"Current Folder: {settings.FolderPath ?? "<not set>"}");
+      DrawLineAt(GetRowForFKey(ConsoleKey.F1), "F1 - Character");
+      DrawLineAt(GetRowForFKey(ConsoleKey.F5), "F5 - Realm");
+      DrawLineAt(GetRowForFKey(ConsoleKey.F9), "F9 - Update Folder Path");
+      DrawLineAt(14, "ESC/Q - Quit");
     }
 
     private static void Pause()
@@ -144,17 +142,10 @@ namespace Duplicator
       while (true)
       {
         Console.Clear();
-        {
-          var prev = Console.ForegroundColor;
-          Console.ForegroundColor = ConsoleColor.Red;
-          Console.WriteLine("=== Character ===");
-          Console.ForegroundColor = prev;
-        }
-        Console.WriteLine();
-        Console.WriteLine("F1 - Back to Home");
-        Console.WriteLine("F2 - Backup Character Data");
-        Console.WriteLine("F3 - Restore Character Data");
-        Console.WriteLine();
+        DrawHeader("=== Character ===", ConsoleColor.Red);
+        DrawLineAt(GetRowForFKey(ConsoleKey.F1), "F1 - Go Back");
+        DrawLineAt(GetRowForFKey(ConsoleKey.F2), "F2 - Backup Character Data");
+        DrawLineAt(GetRowForFKey(ConsoleKey.F3), "F3 - Restore Character Data");
 
         var key = Console.ReadKey(intercept: true);
         switch (key.Key)
@@ -162,16 +153,10 @@ namespace Duplicator
           case ConsoleKey.F1:
             return; // back to home
           case ConsoleKey.F2:
-            {
-              var ok = RunWinRarAdd(settings, "Character.rar", CharacterGuid);
-              if (ok) ShowSuccessAndWait("Character backup completed");
-            }
+            ShowCharacterBackupMenu(settings);
             break;
           case ConsoleKey.F3:
-            {
-              var ok = RunWinRarExtract(settings, "Character.rar");
-              if (ok) ShowSuccessAndWait("Character restore completed");
-            }
+            ShowCharacterRestoreMenu(settings);
             break;
           default:
             break;
@@ -184,17 +169,10 @@ namespace Duplicator
       while (true)
       {
         Console.Clear();
-        {
-          var prev = Console.ForegroundColor;
-          Console.ForegroundColor = ConsoleColor.Blue;
-          Console.WriteLine("=== Realm ===");
-          Console.ForegroundColor = prev;
-        }
-        Console.WriteLine();
-        Console.WriteLine("F5 - Back to Home");
-        Console.WriteLine("F6 - Backup Realm Data");
-        Console.WriteLine("F7 - Restore Realm Data");
-        Console.WriteLine();
+        DrawHeader("=== Realm ===", ConsoleColor.Blue);
+        DrawLineAt(GetRowForFKey(ConsoleKey.F5), "F5 - Go Back");
+        DrawLineAt(GetRowForFKey(ConsoleKey.F6), "F6 - Backup Realm Data");
+        DrawLineAt(GetRowForFKey(ConsoleKey.F7), "F7 - Restore Realm Data");
 
         var key = Console.ReadKey(intercept: true);
         switch (key.Key)
@@ -202,16 +180,10 @@ namespace Duplicator
           case ConsoleKey.F5:
             return; // back to home
           case ConsoleKey.F6:
-            {
-              var ok = RunWinRarAdd(settings, "Realm.rar", RealmGuid);
-              if (ok) ShowSuccessAndWait("Realm backup completed");
-            }
+            ShowRealmBackupMenu(settings);
             break;
           case ConsoleKey.F7:
-            {
-              var ok = RunWinRarExtract(settings, "Realm.rar");
-              if (ok) ShowSuccessAndWait("Realm restore completed");
-            }
+            ShowRealmRestoreMenu(settings);
             break;
           default:
             break;
@@ -229,6 +201,164 @@ namespace Duplicator
         Console.Write('.');
       }
       Thread.Sleep(200); // small settle time
+    }
+
+    private static void ShowCharacterBackupMenu(AppSettings settings)
+    {
+      while (true)
+      {
+        Console.Clear();
+        DrawHeader("=== Character ===", ConsoleColor.Red);
+        DrawLineAt(GetRowForFKey(ConsoleKey.F1), "F1 - Go Back");
+        DrawLineAt(GetRowForFKey(ConsoleKey.F2), "F2 - Backup Character Data");
+
+        var key = Console.ReadKey(intercept: true);
+        switch (key.Key)
+        {
+          case ConsoleKey.F1:
+            return; // back to Character submenu
+          case ConsoleKey.F2:
+            {
+              var ok = RunWinRarAdd(settings, "Character.rar", CharacterGuid);
+              if (ok)
+              {
+                ShowSuccessAndWait("Character backup completed");
+                return; // go back up one menu on success
+              }
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    private static void ShowRealmBackupMenu(AppSettings settings)
+    {
+      while (true)
+      {
+        Console.Clear();
+        DrawHeader("=== Realm ===", ConsoleColor.Blue);
+        DrawLineAt(GetRowForFKey(ConsoleKey.F5), "F5 - Go Back");
+        DrawLineAt(GetRowForFKey(ConsoleKey.F6), "F6 - Backup Realm Data");
+
+        var key = Console.ReadKey(intercept: true);
+        switch (key.Key)
+        {
+          case ConsoleKey.F5:
+            return; // back to Realm submenu
+          case ConsoleKey.F6:
+            {
+              var ok = RunWinRarAdd(settings, "Realm.rar", RealmGuid);
+              if (ok)
+              {
+                ShowSuccessAndWait("Realm backup completed");
+                return; // go back up one menu on success
+              }
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    private static void ShowCharacterRestoreMenu(AppSettings settings)
+    {
+      while (true)
+      {
+        Console.Clear();
+        DrawHeader("=== Character ===", ConsoleColor.Red);
+        DrawLineAt(GetRowForFKey(ConsoleKey.F1), "F1 - Go Back");
+        DrawLineAt(GetRowForFKey(ConsoleKey.F3), "F3 - Restore Character Data");
+
+        var key = Console.ReadKey(intercept: true);
+        switch (key.Key)
+        {
+          case ConsoleKey.F1:
+            return; // back to Character submenu
+          case ConsoleKey.F3:
+            {
+              var ok = RunWinRarExtract(settings, "Character.rar");
+              if (ok) ShowSuccessAndWait("Character restore completed");
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    private static void ShowRealmRestoreMenu(AppSettings settings)
+    {
+      while (true)
+      {
+        Console.Clear();
+        DrawHeader("=== Realm ===", ConsoleColor.Blue);
+        DrawLineAt(GetRowForFKey(ConsoleKey.F5), "F5 - Go Back");
+        DrawLineAt(GetRowForFKey(ConsoleKey.F7), "F7 - Restore Realm Data");
+
+        var key = Console.ReadKey(intercept: true);
+        switch (key.Key)
+        {
+          case ConsoleKey.F5:
+            return; // back to Realm submenu
+          case ConsoleKey.F7:
+            {
+              var ok = RunWinRarExtract(settings, "Realm.rar");
+              if (ok) ShowSuccessAndWait("Realm restore completed");
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    private static void DrawHeader(string title, ConsoleColor? color)
+    {
+      if (color.HasValue)
+      {
+        var prev = Console.ForegroundColor;
+        Console.ForegroundColor = color.Value;
+        DrawLineAt(0, title);
+        Console.ForegroundColor = prev;
+      }
+      else
+      {
+        DrawLineAt(0, title);
+      }
+    }
+
+    private static void DrawLineAt(int row, string text)
+    {
+      try
+      {
+        Console.SetCursorPosition(0, row);
+        Console.WriteLine(text);
+      }
+      catch
+      {
+        // Fallback if console is too small or does not support positioning
+        Console.WriteLine(text);
+      }
+    }
+
+    private static int GetRowForFKey(ConsoleKey key)
+    {
+      return key switch
+      {
+        ConsoleKey.F1 => 4,
+        ConsoleKey.F2 => 5,
+        ConsoleKey.F3 => 6,
+        ConsoleKey.F4 => 7,
+        ConsoleKey.F5 => 8,
+        ConsoleKey.F6 => 9,
+        ConsoleKey.F7 => 10,
+        ConsoleKey.F8 => 11,
+        ConsoleKey.F9 => 12,
+        _ => 4
+      };
     }
 
 
