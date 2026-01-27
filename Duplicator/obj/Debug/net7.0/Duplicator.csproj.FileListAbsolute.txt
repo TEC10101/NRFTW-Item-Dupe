@@ -1,0 +1,15 @@
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\bin\Debug\net7.0\Duplicator.exe
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\bin\Debug\net7.0\Duplicator.deps.json
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\bin\Debug\net7.0\Duplicator.runtimeconfig.json
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\bin\Debug\net7.0\Duplicator.dll
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\bin\Debug\net7.0\Duplicator.pdb
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\obj\Debug\net7.0\Duplicator.csproj.AssemblyReference.cache
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\obj\Debug\net7.0\Duplicator.GeneratedMSBuildEditorConfig.editorconfig
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\obj\Debug\net7.0\Duplicator.AssemblyInfoInputs.cache
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\obj\Debug\net7.0\Duplicator.AssemblyInfo.cs
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\obj\Debug\net7.0\Duplicator.csproj.CoreCompileInputs.cache
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\obj\Debug\net7.0\Duplicator.dll
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\obj\Debug\net7.0\refint\Duplicator.dll
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\obj\Debug\net7.0\Duplicator.pdb
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\obj\Debug\net7.0\Duplicator.genruntimeconfig.cache
+A:\Projects\CSharp\NRFTW Item Dupe\Duplicator\obj\Debug\net7.0\ref\Duplicator.dll
