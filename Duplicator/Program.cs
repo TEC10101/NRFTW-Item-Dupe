@@ -23,45 +23,23 @@ namespace Duplicator
         switch (keyInfo.Key)
         {
           case ConsoleKey.F1:
-            Console.Write("\nEnter folder path: ");
-            var input = Console.ReadLine()?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(input))
-            {
-              WriteInfo("No path entered. Keeping existing value.");
-              break;
-            }
-            settings.FolderPath = input;
-            try
-            {
-              settingsManager.Save(settings);
-              if (!Directory.Exists(input))
-              {
-                WriteWarn("Path saved, but directory does not exist.");
-              }
-              else
-              {
-                WriteSuccess("Folder path saved.");
-              }
-            }
-            catch (Exception ex)
-            {
-              WriteError($"Failed to save settings: {ex.Message}");
-            }
-            Pause();
+            ShowCharacterMenu(settings);
             break;
 
-          case ConsoleKey.F2:
-            ShowExtractMenu(settings);
-            break;
 
-          case ConsoleKey.F3:
-            ShowArchiveMenu(settings);
-            break;
 
           case ConsoleKey.F4:
             WriteInfo("F4 pressed: placeholder command to be implemented.");
             // TODO: Implement command execution for F4
             Pause();
+            break;
+
+          case ConsoleKey.F5:
+            ShowRealmMenu(settings);
+            break;
+
+          case ConsoleKey.F9:
+            UpdateFolderPathScreen(settingsManager, settings);
             break;
 
           case ConsoleKey.Escape:
@@ -83,10 +61,9 @@ namespace Duplicator
       Console.WriteLine();
       Console.WriteLine($"Current Folder: {settings.FolderPath ?? "<not set>"}");
       Console.WriteLine();
-      Console.WriteLine("F1 - Set Folder Path");
-      Console.WriteLine("F2 - Extract RAR (Character/Realm)");
-      Console.WriteLine("F3 - Create RAR (Character/Realm)");
-      Console.WriteLine("F4 - Execute Command 3 (TBD)");
+      Console.WriteLine("F1 - Character");
+      Console.WriteLine("F5 - Realm");
+      Console.WriteLine("F9 - Update Folder Path");
       Console.WriteLine("ESC/Q - Quit");
     }
 
@@ -126,45 +103,143 @@ namespace Duplicator
       Console.WriteLine(message);
     }
 
-    private static void ShowArchiveMenu(AppSettings settings)
+    private static void UpdateFolderPathScreen(SettingsManager settingsManager, AppSettings settings)
+    {
+      Console.Clear();
+      Console.WriteLine("=== Update Folder Path ===");
+      Console.WriteLine();
+      Console.WriteLine($"Current: {settings.FolderPath ?? "<not set>"}");
+      Console.Write("New path (leave blank to cancel): ");
+
+      var input = Console.ReadLine()?.Trim() ?? string.Empty;
+      if (string.IsNullOrWhiteSpace(input))
+      {
+        WriteInfo("No changes made.");
+        Pause();
+        return;
+      }
+
+      settings.FolderPath = input;
+      try
+      {
+        settingsManager.Save(settings);
+        if (!Directory.Exists(input))
+        {
+          WriteWarn("Path saved, but directory does not exist.");
+        }
+        else
+        {
+          WriteSuccess("Folder path saved.");
+        }
+      }
+      catch (Exception ex)
+      {
+        WriteError($"Failed to save settings: {ex.Message}");
+      }
+      Pause();
+    }
+
+    private static void ShowCharacterMenu(AppSettings settings)
     {
       while (true)
       {
         Console.Clear();
-        Console.WriteLine("=== Create Archive ===");
+        {
+          var prev = Console.ForegroundColor;
+          Console.ForegroundColor = ConsoleColor.Red;
+          Console.WriteLine("=== Character ===");
+          Console.ForegroundColor = prev;
+        }
         Console.WriteLine();
-        Console.WriteLine("1 - Character");
-        Console.WriteLine("2 - Realm");
+        Console.WriteLine("F1 - Back to Home");
+        Console.WriteLine("F2 - Backup Character Data");
+        Console.WriteLine("F3 - Restore Character Data");
         Console.WriteLine();
-        Console.WriteLine("Press F3 to return to main menu.");
 
         var key = Console.ReadKey(intercept: true);
         switch (key.Key)
         {
-          case ConsoleKey.F3:
-            return; // back to main menu
-          case ConsoleKey.D1:
-          case ConsoleKey.NumPad1:
-            RunWinRarAdd(settings, "Character.rar", CharacterGuid);
+          case ConsoleKey.F1:
+            return; // back to home
+          case ConsoleKey.F2:
+            {
+              var ok = RunWinRarAdd(settings, "Character.rar", CharacterGuid);
+              if (ok) ShowSuccessAndWait("Character backup completed");
+            }
             break;
-          case ConsoleKey.D2:
-          case ConsoleKey.NumPad2:
-            RunWinRarAdd(settings, "Realm.rar", RealmGuid);
+          case ConsoleKey.F3:
+            {
+              var ok = RunWinRarExtract(settings, "Character.rar");
+              if (ok) ShowSuccessAndWait("Character restore completed");
+            }
             break;
           default:
-            // ignore other keys
             break;
         }
       }
     }
 
-    private static void RunWinRarAdd(AppSettings settings, string archiveName, string guid)
+    private static void ShowRealmMenu(AppSettings settings)
+    {
+      while (true)
+      {
+        Console.Clear();
+        {
+          var prev = Console.ForegroundColor;
+          Console.ForegroundColor = ConsoleColor.Blue;
+          Console.WriteLine("=== Realm ===");
+          Console.ForegroundColor = prev;
+        }
+        Console.WriteLine();
+        Console.WriteLine("F5 - Back to Home");
+        Console.WriteLine("F6 - Backup Realm Data");
+        Console.WriteLine("F7 - Restore Realm Data");
+        Console.WriteLine();
+
+        var key = Console.ReadKey(intercept: true);
+        switch (key.Key)
+        {
+          case ConsoleKey.F5:
+            return; // back to home
+          case ConsoleKey.F6:
+            {
+              var ok = RunWinRarAdd(settings, "Realm.rar", RealmGuid);
+              if (ok) ShowSuccessAndWait("Realm backup completed");
+            }
+            break;
+          case ConsoleKey.F7:
+            {
+              var ok = RunWinRarExtract(settings, "Realm.rar");
+              if (ok) ShowSuccessAndWait("Realm restore completed");
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    private static void ShowSuccessAndWait(string message, int seconds = 3)
+    {
+      Console.WriteLine();
+      Console.Write($"{message}");
+      for (int i = 0; i < seconds; i++)
+      {
+        Thread.Sleep(1000);
+        Console.Write('.');
+      }
+      Thread.Sleep(200); // small settle time
+    }
+
+
+
+    private static bool RunWinRarAdd(AppSettings settings, string archiveName, string guid)
     {
       if (string.IsNullOrWhiteSpace(settings.FolderPath))
       {
         WriteError("Folder path not set. Press F1 to set it first.");
         Pause();
-        return;
+        return false;
       }
 
       var workingDir = settings.FolderPath!;
@@ -189,7 +264,7 @@ namespace Duplicator
       {
         WriteError("WinRAR.exe not found. Please install WinRAR or adjust the path.");
         Pause();
-        return;
+        return false;
       }
 
       var wildcard = $"*{guid}*";
@@ -212,7 +287,7 @@ namespace Duplicator
         {
           WriteError("Failed to start WinRAR process.");
           Pause();
-          return;
+          return false;
         }
 
         var output = proc.StandardOutput.ReadToEnd();
@@ -222,6 +297,7 @@ namespace Duplicator
         if (proc.ExitCode == 0)
         {
           WriteSuccess($"Archive '{archiveName}' created successfully.");
+          return true;
         }
         else
         {
@@ -243,47 +319,18 @@ namespace Duplicator
       }
 
       Pause();
+      return false;
     }
 
-    private static void ShowExtractMenu(AppSettings settings)
-    {
-      while (true)
-      {
-        Console.Clear();
-        Console.WriteLine("=== Extract Archive ===");
-        Console.WriteLine();
-        Console.WriteLine("1 - Character");
-        Console.WriteLine("2 - Realm");
-        Console.WriteLine();
-        Console.WriteLine("Press F2 to return to main menu.");
 
-        var key = Console.ReadKey(intercept: true);
-        switch (key.Key)
-        {
-          case ConsoleKey.F2:
-            return; // back to main menu
-          case ConsoleKey.D1:
-          case ConsoleKey.NumPad1:
-            RunWinRarExtract(settings, "Character.rar");
-            break;
-          case ConsoleKey.D2:
-          case ConsoleKey.NumPad2:
-            RunWinRarExtract(settings, "Realm.rar");
-            break;
-          default:
-            // ignore other keys
-            break;
-        }
-      }
-    }
 
-    private static void RunWinRarExtract(AppSettings settings, string archiveName)
+    private static bool RunWinRarExtract(AppSettings settings, string archiveName)
     {
       if (string.IsNullOrWhiteSpace(settings.FolderPath))
       {
         WriteError("Folder path not set. Press F1 to set it first.");
         Pause();
-        return;
+        return false;
       }
 
       var workingDir = settings.FolderPath!;
@@ -292,7 +339,7 @@ namespace Duplicator
       {
         WriteError($"{archiveName} not found in the selected folder.");
         Pause();
-        return;
+        return false;
       }
 
       var winRarCandidates = new[]
@@ -315,7 +362,7 @@ namespace Duplicator
       {
         WriteError("WinRAR.exe not found. Please install WinRAR or adjust the path.");
         Pause();
-        return;
+        return false;
       }
 
       try
@@ -336,7 +383,7 @@ namespace Duplicator
         {
           WriteError("Failed to start WinRAR process.");
           Pause();
-          return;
+          return false;
         }
 
         var output = proc.StandardOutput.ReadToEnd();
@@ -346,6 +393,7 @@ namespace Duplicator
         if (proc.ExitCode == 0)
         {
           WriteSuccess("Extraction completed successfully.");
+          return true;
         }
         else
         {
@@ -367,6 +415,7 @@ namespace Duplicator
       }
 
       Pause();
+      return false;
     }
   }
 }
