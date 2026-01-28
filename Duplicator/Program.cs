@@ -91,7 +91,7 @@ namespace Duplicator
     private static void WriteError(string message)
     {
       var prev = Console.ForegroundColor;
-      Console.ForegroundColor = ConsoleColor.Red;
+      Console.ForegroundColor = ConsoleColor.Yellow;
       Console.WriteLine(message);
       Console.ForegroundColor = prev;
     }
@@ -142,7 +142,7 @@ namespace Duplicator
       while (true)
       {
         Console.Clear();
-        DrawHeader("=== Character ===", ConsoleColor.Red);
+        DrawHeader("=== Character ===", ConsoleColor.Yellow);
         DrawLineAt(GetRowForFKey(ConsoleKey.F1), "F1 - Go Back");
         DrawLineAt(GetRowForFKey(ConsoleKey.F2), "F2 - Backup Character Data");
         DrawLineAt(GetRowForFKey(ConsoleKey.F3), "F3 - Restore Character Data");
@@ -208,7 +208,7 @@ namespace Duplicator
       while (true)
       {
         Console.Clear();
-        DrawHeader("=== Character ===", ConsoleColor.Red);
+        DrawHeader("=== Character ===", ConsoleColor.Yellow);
         DrawLineAt(GetRowForFKey(ConsoleKey.F1), "F1 - Go Back");
         DrawLineAt(GetRowForFKey(ConsoleKey.F2), "F2 - Backup Character Data");
 
@@ -268,7 +268,7 @@ namespace Duplicator
       while (true)
       {
         Console.Clear();
-        DrawHeader("=== Character ===", ConsoleColor.Red);
+        DrawHeader("=== Character ===", ConsoleColor.Yellow);
         DrawLineAt(GetRowForFKey(ConsoleKey.F1), "F1 - Go Back");
         DrawLineAt(GetRowForFKey(ConsoleKey.F3), "F3 - Restore Character Data");
 
