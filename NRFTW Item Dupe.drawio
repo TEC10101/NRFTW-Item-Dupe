@@ -1,0 +1,88 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0" version="29.3.6">
+  <diagram name="Page-1" id="5yq33RAn1ziJXviddufi">
+    <mxGraphModel dx="1693" dy="823" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="JK4CoBXHPuJELGsateEK-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Main Menu" vertex="1">
+          <mxGeometry height="60" width="120" x="130" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-2" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F1 Character" vertex="1">
+          <mxGeometry height="30" width="130" x="280" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-3" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F5 Realm" vertex="1">
+          <mxGeometry height="30" width="130" x="280" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-4" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F9 Update Config" vertex="1">
+          <mxGeometry height="30" width="130" x="280" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="F1 Character" vertex="1">
+          <mxGeometry height="60" width="120" x="460" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-7" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F1 Go Back" vertex="1">
+          <mxGeometry height="30" width="130" x="620" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-8" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F2 Backup Character Data" vertex="1">
+          <mxGeometry height="30" width="190" x="620" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-9" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F3 Restore Character Data" vertex="1">
+          <mxGeometry height="30" width="210" x="620" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-10" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F4 Select Character" vertex="1">
+          <mxGeometry height="30" width="210" x="620" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="F2 Backup" vertex="1">
+          <mxGeometry height="60" width="120" x="880" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F1 Go Back" vertex="1">
+          <mxGeometry height="30" width="130" x="1030" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-13" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F2 Backup Character Data" vertex="1">
+          <mxGeometry height="30" width="190" x="1030" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="F3 Restore" vertex="1">
+          <mxGeometry height="60" width="120" x="880" y="245" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-15" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F1 Go Back" vertex="1">
+          <mxGeometry height="30" width="130" x="1040" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-16" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F3 Restore Character Data" vertex="1">
+          <mxGeometry height="30" width="190" x="1040" y="275" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-17" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="F4 Character Mgmt" vertex="1">
+          <mxGeometry height="60" width="120" x="880" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-18" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F1 Go Back" vertex="1">
+          <mxGeometry height="30" width="130" x="1040" y="255" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-22" edge="1" parent="1" source="JK4CoBXHPuJELGsateEK-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="JK4CoBXHPuJELGsateEK-21" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-19" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="1-99 Characters Listed w/Guid" vertex="1">
+          <mxGeometry height="30" width="180" x="1040" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-21" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="Name Character" vertex="1">
+          <mxGeometry height="30" width="180" x="1300" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-23" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="F5 Realm" vertex="1">
+          <mxGeometry height="60" width="120" x="460" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-24" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F5 Go Back" vertex="1">
+          <mxGeometry height="30" width="130" x="610" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-25" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F6 Backup Realm Data" vertex="1">
+          <mxGeometry height="30" width="190" x="610" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-26" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="F7 Restore Realm Data" vertex="1">
+          <mxGeometry height="30" width="210" x="610" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-27" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;div&gt;F8 Select Realm&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="210" x="610" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="JK4CoBXHPuJELGsateEK-28" parent="1" style="shape=tape;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="100" width="120" x="880" y="590" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
