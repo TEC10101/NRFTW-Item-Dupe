@@ -1,5 +1,6 @@
 using System.Text;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Duplicator
 {
@@ -39,7 +40,7 @@ namespace Duplicator
             break;
 
           case ConsoleKey.F9:
-            UpdateFolderPathScreen(settingsManager, settings);
+            ShowConfigMenu(settingsManager, settings);
             break;
 
           case ConsoleKey.Escape:
@@ -61,7 +62,7 @@ namespace Duplicator
       DrawLineAt(2, $"Current Folder: {settings.FolderPath ?? "<not set>"}");
       DrawLineAt(GetRowForFKey(ConsoleKey.F1), "F1 - Character");
       DrawLineAt(GetRowForFKey(ConsoleKey.F5), "F5 - Realm");
-      DrawLineAt(GetRowForFKey(ConsoleKey.F9), "F9 - Update Folder Path");
+      DrawLineAt(GetRowForFKey(ConsoleKey.F9), "F9 - Update Config ▶");
       DrawLineAt(14, "ESC/Q - Quit");
     }
 
@@ -219,7 +220,8 @@ namespace Duplicator
             return; // back to Character submenu
           case ConsoleKey.F2:
             {
-              var ok = RunWinRarAdd(settings, "Character.rar", CharacterGuid);
+              var archiveName = GetDatedArchiveName("Character");
+              var ok = RunWinRarAdd(settings, archiveName, GetCharacterGuid(settings));
               if (ok)
               {
                 ShowSuccessAndWait("Character backup completed");
@@ -249,7 +251,8 @@ namespace Duplicator
             return; // back to Realm submenu
           case ConsoleKey.F6:
             {
-              var ok = RunWinRarAdd(settings, "Realm.rar", RealmGuid);
+              var archiveName = GetDatedArchiveName("Realm");
+              var ok = RunWinRarAdd(settings, archiveName, GetRealmGuid(settings));
               if (ok)
               {
                 ShowSuccessAndWait("Realm backup completed");
@@ -279,7 +282,23 @@ namespace Duplicator
             return; // back to Character submenu
           case ConsoleKey.F3:
             {
-              var ok = RunWinRarExtract(settings, "Character.rar");
+              var workingDir = settings.FolderPath ?? string.Empty;
+              var latest = FindLatestArchive(workingDir, "Character");
+              if (latest is null)
+              {
+                WriteError("No Character backup found.");
+                Pause();
+                break;
+              }
+
+              if (!ConfirmRestoreIfOld(latest))
+              {
+                WriteWarn("Restore cancelled.");
+                Pause();
+                break;
+              }
+
+              var ok = RunWinRarExtract(settings, Path.GetFileName(latest));
               if (ok) ShowSuccessAndWait("Character restore completed");
             }
             break;
@@ -305,7 +324,23 @@ namespace Duplicator
             return; // back to Realm submenu
           case ConsoleKey.F7:
             {
-              var ok = RunWinRarExtract(settings, "Realm.rar");
+              var workingDir = settings.FolderPath ?? string.Empty;
+              var latest = FindLatestArchive(workingDir, "Realm");
+              if (latest is null)
+              {
+                WriteError("No Realm backup found.");
+                Pause();
+                break;
+              }
+
+              if (!ConfirmRestoreIfOld(latest))
+              {
+                WriteWarn("Restore cancelled.");
+                Pause();
+                break;
+              }
+
+              var ok = RunWinRarExtract(settings, Path.GetFileName(latest));
               if (ok) ShowSuccessAndWait("Realm restore completed");
             }
             break;
@@ -357,6 +392,9 @@ namespace Duplicator
         ConsoleKey.F7 => 10,
         ConsoleKey.F8 => 11,
         ConsoleKey.F9 => 12,
+        ConsoleKey.F10 => 13,
+        ConsoleKey.F11 => 14,
+        ConsoleKey.F12 => 15,
         _ => 4
       };
     }
@@ -546,6 +584,157 @@ namespace Duplicator
 
       Pause();
       return false;
+    }
+
+    private static string GetDatedArchiveName(string baseName)
+    {
+      var date = DateTime.Now.ToString("yyyy-MM-dd");
+      return $"{date}_{baseName}.rar";
+    }
+
+    private static string? FindLatestArchive(string workingDir, string baseName)
+    {
+      try
+      {
+        if (string.IsNullOrWhiteSpace(workingDir) || !Directory.Exists(workingDir))
+        {
+          return null;
+        }
+        var pattern = $"*_{baseName}.rar";
+        var files = Directory.GetFiles(workingDir, pattern);
+        var latest = files
+          .Select(f => new FileInfo(f))
+          .OrderByDescending(fi => fi.LastWriteTimeUtc)
+          .FirstOrDefault();
+        return latest?.FullName;
+      }
+      catch
+      {
+        return null;
+      }
+    }
+
+    private static bool ConfirmRestoreIfOld(string archiveFullPath)
+    {
+      try
+      {
+        var fi = new FileInfo(archiveFullPath);
+        var age = DateTime.UtcNow - fi.LastWriteTimeUtc;
+        if (age > TimeSpan.FromMinutes(5))
+        {
+          WriteWarn($"Backup '{fi.Name}' is {age.TotalMinutes:F1} minutes old. Proceed with restore? (Y/N)");
+          while (true)
+          {
+            var key = Console.ReadKey(intercept: true).Key;
+            if (key == ConsoleKey.Y) return true;
+            if (key == ConsoleKey.N) return false;
+          }
+        }
+      }
+      catch
+      {
+        // If we can't read file info, proceed without the warning
+      }
+      return true;
+    }
+
+    private static string GetCharacterGuid(AppSettings settings)
+    {
+      return string.IsNullOrWhiteSpace(settings.CharacterGuid) ? CharacterGuid : settings.CharacterGuid!;
+    }
+
+    private static string GetRealmGuid(AppSettings settings)
+    {
+      return string.IsNullOrWhiteSpace(settings.RealmGuid) ? RealmGuid : settings.RealmGuid!;
+    }
+
+    private static void ShowConfigMenu(SettingsManager settingsManager, AppSettings settings)
+    {
+      while (true)
+      {
+        Console.Clear();
+        DrawHeader("=== Update Config ===", null);
+        DrawLineAt(GetRowForFKey(ConsoleKey.F9), "F9 - Back to Home");
+        DrawLineAt(GetRowForFKey(ConsoleKey.F10), "F10 - Update Character GUID");
+        DrawLineAt(GetRowForFKey(ConsoleKey.F11), "F11 - Update Realm GUID");
+        DrawLineAt(GetRowForFKey(ConsoleKey.F12), "F12 - Update Folder Path");
+
+        var key = Console.ReadKey(intercept: true);
+        switch (key.Key)
+        {
+          case ConsoleKey.F9:
+            return; // back to home
+          case ConsoleKey.F10:
+            UpdateCharacterGuidScreen(settingsManager, settings);
+            break;
+          case ConsoleKey.F11:
+            UpdateRealmGuidScreen(settingsManager, settings);
+            break;
+          case ConsoleKey.F12:
+            UpdateFolderPathScreen(settingsManager, settings);
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    private static void UpdateCharacterGuidScreen(SettingsManager settingsManager, AppSettings settings)
+    {
+      Console.Clear();
+      Console.WriteLine("=== Update Character GUID ===");
+      Console.WriteLine();
+      Console.WriteLine($"Current: {settings.CharacterGuid ?? "<not set>"}");
+      Console.Write("New GUID (leave blank to cancel): ");
+
+      var input = Console.ReadLine()?.Trim() ?? string.Empty;
+      if (string.IsNullOrWhiteSpace(input))
+      {
+        WriteInfo("No changes made.");
+        Pause();
+        return;
+      }
+
+      settings.CharacterGuid = input;
+      try
+      {
+        settingsManager.Save(settings);
+        WriteSuccess("Character GUID saved.");
+      }
+      catch (Exception ex)
+      {
+        WriteError($"Failed to save settings: {ex.Message}");
+      }
+      Pause();
+    }
+
+    private static void UpdateRealmGuidScreen(SettingsManager settingsManager, AppSettings settings)
+    {
+      Console.Clear();
+      Console.WriteLine("=== Update Realm GUID ===");
+      Console.WriteLine();
+      Console.WriteLine($"Current: {settings.RealmGuid ?? "<not set>"}");
+      Console.Write("New GUID (leave blank to cancel): ");
+
+      var input = Console.ReadLine()?.Trim() ?? string.Empty;
+      if (string.IsNullOrWhiteSpace(input))
+      {
+        WriteInfo("No changes made.");
+        Pause();
+        return;
+      }
+
+      settings.RealmGuid = input;
+      try
+      {
+        settingsManager.Save(settings);
+        WriteSuccess("Realm GUID saved.");
+      }
+      catch (Exception ex)
+      {
+        WriteError($"Failed to save settings: {ex.Message}");
+      }
+      Pause();
     }
   }
 }

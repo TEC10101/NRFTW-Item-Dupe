@@ -5,6 +5,8 @@ namespace Duplicator
   public class AppSettings
   {
     public string? FolderPath { get; set; }
+    public string? CharacterGuid { get; set; }
+    public string? RealmGuid { get; set; }
   }
 
   public class SettingsManager
