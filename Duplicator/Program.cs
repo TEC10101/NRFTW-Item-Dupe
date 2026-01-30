@@ -107,12 +107,59 @@ namespace Duplicator
     private static void UpdateFolderPathScreen(SettingsManager settingsManager, AppSettings settings)
     {
       Console.Clear();
-      Console.WriteLine("=== Update Folder Path ===");
+      Console.WriteLine("=== Select Folder Path ===");
       Console.WriteLine();
-      Console.WriteLine($"Current: {settings.FolderPath ?? "<not set>"}");
-      Console.Write("New path (leave blank to cancel): ");
 
-      var input = Console.ReadLine()?.Trim() ?? string.Empty;
+      var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+      var basePath = Path.Combine(userProfile, "AppData", "LocalLow", "Moon Studios", "NoRestForTheWicked", "DataStore");
+
+      Console.WriteLine($"Base: {basePath}");
+      Console.WriteLine($"Current: {settings.FolderPath ?? "<not set>"}");
+      Console.WriteLine();
+
+      if (!Directory.Exists(basePath))
+      {
+        WriteError("Base DataStore folder not found.");
+        Pause();
+        return;
+      }
+
+      string[] candidates;
+      try
+      {
+        candidates = Directory.GetDirectories(basePath)
+          .Where(d =>
+          {
+            var name = Path.GetFileName(d);
+            return name.All(char.IsDigit);
+          })
+          .OrderBy(d => Path.GetFileName(d))
+          .Take(99)
+          .ToArray();
+      }
+      catch (Exception ex)
+      {
+        WriteError($"Failed to read subfolders: {ex.Message}");
+        Pause();
+        return;
+      }
+
+      if (candidates.Length == 0)
+      {
+        WriteWarn("No 5-digit folders found in DataStore.");
+        Pause();
+        return;
+      }
+
+      for (int i = 0; i < candidates.Length; i++)
+      {
+        var name = Path.GetFileName(candidates[i]);
+        Console.WriteLine($"{i + 1}. {name}");
+      }
+
+      Console.WriteLine();
+      Console.Write("Enter number to select (or blank to cancel): ");
+      var input = Console.ReadLine()?.Trim();
       if (string.IsNullOrWhiteSpace(input))
       {
         WriteInfo("No changes made.");
@@ -120,18 +167,20 @@ namespace Duplicator
         return;
       }
 
-      settings.FolderPath = input;
+      if (!int.TryParse(input, out var idx) || idx < 1 || idx > candidates.Length)
+      {
+        WriteError("Invalid selection.");
+        Pause();
+        return;
+      }
+
+      var selectedPath = candidates[idx - 1];
+      settings.FolderPath = selectedPath;
+
       try
       {
         settingsManager.Save(settings);
-        if (!Directory.Exists(input))
-        {
-          WriteWarn("Path saved, but directory does not exist.");
-        }
-        else
-        {
-          WriteSuccess("Folder path saved.");
-        }
+        WriteSuccess($"Folder path set to {selectedPath}.");
       }
       catch (Exception ex)
       {
