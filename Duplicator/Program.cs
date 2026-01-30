@@ -8,9 +8,6 @@ namespace Duplicator
 {
   public class Program
   {
-    private const string CharacterGuid = "cc49dd5a-9557-4ce5-9293-7ca807696018";
-    private const string RealmGuid = "fbe0e823-0478-4c99-a584-45e6b94c6a50";
-
     public static void Main(string[] args)
     {
       Console.OutputEncoding = Encoding.UTF8;
@@ -27,14 +24,6 @@ namespace Duplicator
         {
           case ConsoleKey.F1:
             ShowCharacterMenu(settings);
-            break;
-
-
-
-          case ConsoleKey.F4:
-            WriteInfo("F4 pressed: placeholder command to be implemented.");
-            // TODO: Implement command execution for F4
-            Pause();
             break;
 
           case ConsoleKey.F5:
@@ -908,11 +897,11 @@ namespace Duplicator
         var age = DateTime.UtcNow - fi.LastWriteTimeUtc;
         if (age > TimeSpan.FromMinutes(5))
         {
-          WriteWarn($"Backup '{fi.Name}' is {age.TotalMinutes:F1} minutes old. Proceed with restore? (Y/N)");
+          WriteWarn($"Backup '{fi.Name}' is {age.TotalMinutes:F1} minutes old. Proceed with restore? (Y/F3/N)");
           while (true)
           {
             var key = Console.ReadKey(intercept: true).Key;
-            if (key == ConsoleKey.Y) return true;
+            if (key == ConsoleKey.Y || key == ConsoleKey.F3) return true;
             if (key == ConsoleKey.N) return false;
           }
         }
