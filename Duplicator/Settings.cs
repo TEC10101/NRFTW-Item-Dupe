@@ -7,6 +7,8 @@ namespace Duplicator
     public string? FolderPath { get; set; }
     public string? CharacterGuid { get; set; }
     public string? RealmGuid { get; set; }
+    public Dictionary<string, string>? CharacterNames { get; set; }
+    public Dictionary<string, string>? RealmNames { get; set; }
   }
 
   public class SettingsManager

@@ -1,6 +1,8 @@
 using System.Text;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 namespace Duplicator
 {
@@ -40,7 +42,7 @@ namespace Duplicator
             break;
 
           case ConsoleKey.F9:
-            ShowConfigMenu(settingsManager, settings);
+            UpdateFolderPathScreen(settingsManager, settings);
             break;
 
           case ConsoleKey.Escape:
@@ -62,7 +64,7 @@ namespace Duplicator
       DrawLineAt(2, $"Current Folder: {settings.FolderPath ?? "<not set>"}");
       DrawLineAt(GetRowForFKey(ConsoleKey.F1), "F1 - Character");
       DrawLineAt(GetRowForFKey(ConsoleKey.F5), "F5 - Realm");
-      DrawLineAt(GetRowForFKey(ConsoleKey.F9), "F9 - Update Config ▶");
+      DrawLineAt(GetRowForFKey(ConsoleKey.F9), "F9 - Update Folder Path");
       DrawLineAt(14, "ESC/Q - Quit");
     }
 
@@ -144,9 +146,11 @@ namespace Duplicator
       {
         Console.Clear();
         DrawHeader("=== Character ===", ConsoleColor.Yellow);
+        DrawSelectedInfo("Character", settings);
         DrawLineAt(GetRowForFKey(ConsoleKey.F1), "F1 - Go Back");
         DrawLineAt(GetRowForFKey(ConsoleKey.F2), "F2 - Backup Character Data");
         DrawLineAt(GetRowForFKey(ConsoleKey.F3), "F3 - Restore Character Data");
+        DrawLineAt(GetRowForFKey(ConsoleKey.F4), "F4 - Select Character");
 
         var key = Console.ReadKey(intercept: true);
         switch (key.Key)
@@ -158,6 +162,9 @@ namespace Duplicator
             break;
           case ConsoleKey.F3:
             ShowCharacterRestoreMenu(settings);
+            break;
+          case ConsoleKey.F4:
+            ShowCharacterSelectMenu(settings);
             break;
           default:
             break;
@@ -171,9 +178,11 @@ namespace Duplicator
       {
         Console.Clear();
         DrawHeader("=== Realm ===", ConsoleColor.Blue);
+        DrawSelectedInfo("Realm", settings);
         DrawLineAt(GetRowForFKey(ConsoleKey.F5), "F5 - Go Back");
         DrawLineAt(GetRowForFKey(ConsoleKey.F6), "F6 - Backup Realm Data");
         DrawLineAt(GetRowForFKey(ConsoleKey.F7), "F7 - Restore Realm Data");
+        DrawLineAt(GetRowForFKey(ConsoleKey.F8), "F8 - Select Realm");
 
         var key = Console.ReadKey(intercept: true);
         switch (key.Key)
@@ -185,6 +194,9 @@ namespace Duplicator
             break;
           case ConsoleKey.F7:
             ShowRealmRestoreMenu(settings);
+            break;
+          case ConsoleKey.F8:
+            ShowRealmSelectMenu(settings);
             break;
           default:
             break;
@@ -209,7 +221,8 @@ namespace Duplicator
       while (true)
       {
         Console.Clear();
-        DrawHeader("=== Character ===", ConsoleColor.Yellow);
+        DrawHeader("=== Character Backup ===", ConsoleColor.Yellow);
+        DrawSelectedInfo("Character", settings);
         DrawLineAt(GetRowForFKey(ConsoleKey.F1), "F1 - Go Back");
         DrawLineAt(GetRowForFKey(ConsoleKey.F2), "F2 - Backup Character Data");
 
@@ -220,11 +233,18 @@ namespace Duplicator
             return; // back to Character submenu
           case ConsoleKey.F2:
             {
-              var archiveName = GetDatedArchiveName("Character");
-              var ok = RunWinRarAdd(settings, archiveName, GetCharacterGuid(settings));
+              var guid = settings.CharacterGuid;
+              if (string.IsNullOrWhiteSpace(guid))
+              {
+                WriteError("No Character selected. Press F4 to select.");
+                Pause();
+                break;
+              }
+              var archiveName = GetDatedArchiveName("Character", guid);
+              var ok = RunWinRarAdd(settings, archiveName, guid);
               if (ok)
               {
-                ShowSuccessAndWait("Character backup completed");
+                ShowSuccessAndWait("Returning to Character menu");
                 return; // go back up one menu on success
               }
             }
@@ -240,7 +260,8 @@ namespace Duplicator
       while (true)
       {
         Console.Clear();
-        DrawHeader("=== Realm ===", ConsoleColor.Blue);
+        DrawHeader("=== Realm Backup ===", ConsoleColor.Blue);
+        DrawSelectedInfo("Realm", settings);
         DrawLineAt(GetRowForFKey(ConsoleKey.F5), "F5 - Go Back");
         DrawLineAt(GetRowForFKey(ConsoleKey.F6), "F6 - Backup Realm Data");
 
@@ -251,11 +272,18 @@ namespace Duplicator
             return; // back to Realm submenu
           case ConsoleKey.F6:
             {
-              var archiveName = GetDatedArchiveName("Realm");
-              var ok = RunWinRarAdd(settings, archiveName, GetRealmGuid(settings));
+              var guid = settings.RealmGuid;
+              if (string.IsNullOrWhiteSpace(guid))
+              {
+                WriteError("No Realm selected. Press F8 to select.");
+                Pause();
+                break;
+              }
+              var archiveName = GetDatedArchiveName("Realm", guid);
+              var ok = RunWinRarAdd(settings, archiveName, guid);
               if (ok)
               {
-                ShowSuccessAndWait("Realm backup completed");
+                ShowSuccessAndWait("Returning to Realm menu");
                 return; // go back up one menu on success
               }
             }
@@ -271,7 +299,8 @@ namespace Duplicator
       while (true)
       {
         Console.Clear();
-        DrawHeader("=== Character ===", ConsoleColor.Yellow);
+        DrawHeader("=== Character Restore ===", ConsoleColor.Yellow);
+        DrawSelectedInfo("Character", settings);
         DrawLineAt(GetRowForFKey(ConsoleKey.F1), "F1 - Go Back");
         DrawLineAt(GetRowForFKey(ConsoleKey.F3), "F3 - Restore Character Data");
 
@@ -283,7 +312,14 @@ namespace Duplicator
           case ConsoleKey.F3:
             {
               var workingDir = settings.FolderPath ?? string.Empty;
-              var latest = FindLatestArchive(workingDir, "Character");
+              var guid = settings.CharacterGuid;
+              if (string.IsNullOrWhiteSpace(guid))
+              {
+                WriteError("No Character selected. Press F4 to select.");
+                Pause();
+                break;
+              }
+              var latest = FindLatestArchive(workingDir, "Character", guid);
               if (latest is null)
               {
                 WriteError("No Character backup found.");
@@ -299,7 +335,7 @@ namespace Duplicator
               }
 
               var ok = RunWinRarExtract(settings, Path.GetFileName(latest));
-              if (ok) ShowSuccessAndWait("Character restore completed");
+              if (ok) ShowSuccessAndWait("Staying on Character Restore menu");
             }
             break;
           default:
@@ -313,7 +349,8 @@ namespace Duplicator
       while (true)
       {
         Console.Clear();
-        DrawHeader("=== Realm ===", ConsoleColor.Blue);
+        DrawHeader("=== Realm Restore ===", ConsoleColor.Blue);
+        DrawSelectedInfo("Realm", settings);
         DrawLineAt(GetRowForFKey(ConsoleKey.F5), "F5 - Go Back");
         DrawLineAt(GetRowForFKey(ConsoleKey.F7), "F7 - Restore Realm Data");
 
@@ -325,7 +362,14 @@ namespace Duplicator
           case ConsoleKey.F7:
             {
               var workingDir = settings.FolderPath ?? string.Empty;
-              var latest = FindLatestArchive(workingDir, "Realm");
+              var guid = settings.RealmGuid;
+              if (string.IsNullOrWhiteSpace(guid))
+              {
+                WriteError("No Realm selected. Press F8 to select.");
+                Pause();
+                break;
+              }
+              var latest = FindLatestArchive(workingDir, "Realm", guid);
               if (latest is null)
               {
                 WriteError("No Realm backup found.");
@@ -341,13 +385,37 @@ namespace Duplicator
               }
 
               var ok = RunWinRarExtract(settings, Path.GetFileName(latest));
-              if (ok) ShowSuccessAndWait("Realm restore completed");
+              if (ok) ShowSuccessAndWait("Staying on Realm Restore menu");
             }
             break;
           default:
             break;
         }
       }
+    }
+
+    private static void DrawSelectedInfo(string kind, AppSettings settings)
+    {
+      string? guid = kind == "Character" ? settings.CharacterGuid : settings.RealmGuid;
+      if (string.IsNullOrWhiteSpace(guid))
+      {
+        DrawLineAt(2, $"Selected {kind}: <none>");
+        return;
+      }
+      string? name = null;
+      if (kind == "Character")
+      {
+        if (settings.CharacterNames != null && settings.CharacterNames.TryGetValue(guid, out var n)) name = n;
+      }
+      else
+      {
+        if (settings.RealmNames != null && settings.RealmNames.TryGetValue(guid, out var n)) name = n;
+      }
+
+      var prev = Console.ForegroundColor;
+      Console.ForegroundColor = ConsoleColor.Yellow;
+      DrawLineAt(2, name is not null ? $"Selected {kind}: {name} ({guid})" : $"Selected {kind}: {guid}");
+      Console.ForegroundColor = prev;
     }
 
     private static void DrawHeader(string title, ConsoleColor? color)
@@ -392,9 +460,6 @@ namespace Duplicator
         ConsoleKey.F7 => 10,
         ConsoleKey.F8 => 11,
         ConsoleKey.F9 => 12,
-        ConsoleKey.F10 => 13,
-        ConsoleKey.F11 => 14,
-        ConsoleKey.F12 => 15,
         _ => 4
       };
     }
@@ -560,7 +625,35 @@ namespace Duplicator
 
         if (proc.ExitCode == 0)
         {
-          WriteSuccess("Extraction completed successfully.");
+          try
+          {
+            var fi = new FileInfo(archivePath);
+            var age = DateTime.UtcNow - fi.LastWriteTimeUtc;
+
+            var lower = archiveName.ToLowerInvariant();
+            var kind = lower.Contains("character") ? "character" :
+                       lower.Contains("realm") ? "realm" : "data";
+
+            string ago;
+            if (age.TotalSeconds < 60)
+            {
+              var seconds = Math.Max(1, (int)Math.Round(age.TotalSeconds));
+              ago = $"{seconds} seconds ago";
+            }
+            else
+            {
+              var minutes = Math.Max(1, (int)Math.Round(age.TotalMinutes));
+              ago = $"{minutes} minutes ago";
+            }
+
+            WriteSuccess($"Restored {kind} to {ago}.");
+          }
+          catch
+          {
+            // Fallback to generic message if we can't compute age
+            WriteSuccess("Extraction completed successfully.");
+          }
+
           return true;
         }
         else
@@ -586,13 +679,13 @@ namespace Duplicator
       return false;
     }
 
-    private static string GetDatedArchiveName(string baseName)
+    private static string GetDatedArchiveName(string baseName, string guid)
     {
       var date = DateTime.Now.ToString("yyyy-MM-dd");
-      return $"{date}_{baseName}.rar";
+      return $"{date}_{baseName}_{guid}.rar";
     }
 
-    private static string? FindLatestArchive(string workingDir, string baseName)
+    private static string? FindLatestArchive(string workingDir, string baseName, string guid)
     {
       try
       {
@@ -600,7 +693,7 @@ namespace Duplicator
         {
           return null;
         }
-        var pattern = $"*_{baseName}.rar";
+        var pattern = $"*_{baseName}_{guid}.rar";
         var files = Directory.GetFiles(workingDir, pattern);
         var latest = files
           .Select(f => new FileInfo(f))
@@ -612,6 +705,150 @@ namespace Duplicator
       {
         return null;
       }
+    }
+
+    private static void ShowCharacterSelectMenu(AppSettings settings)
+    {
+      if (string.IsNullOrWhiteSpace(settings.FolderPath))
+      {
+        WriteError("Folder path not set. Set it on home screen.");
+        Pause();
+        return;
+      }
+
+      var list = ScanGuids(settings.FolderPath!, "Character");
+      Console.Clear();
+      DrawHeader("=== Select Character ===", ConsoleColor.Yellow);
+      if (list.Count == 0)
+      {
+        WriteWarn("No Character GUIDs found in filenames.");
+        Pause();
+        return;
+      }
+
+      for (int i = 0; i < list.Count; i++)
+      {
+        var guid = list[i];
+        var name = settings.CharacterNames != null && settings.CharacterNames.TryGetValue(guid, out var n) ? n : null;
+        Console.WriteLine($"{i + 1}. {(name is not null ? name + " - " : string.Empty)}{guid}");
+      }
+      Console.WriteLine();
+      Console.Write("Enter number to select (or blank to cancel): ");
+      var input = Console.ReadLine()?.Trim();
+      if (string.IsNullOrWhiteSpace(input)) return;
+      if (!int.TryParse(input, out var idx) || idx < 1 || idx > list.Count)
+      {
+        WriteError("Invalid selection.");
+        Pause();
+        return;
+      }
+      var selected = list[idx - 1];
+      settings.CharacterGuid = selected;
+
+      Console.Write("Name? (optional, leave blank to skip): ");
+      var nameInput = Console.ReadLine()?.Trim();
+      if (!string.IsNullOrWhiteSpace(nameInput))
+      {
+        settings.CharacterNames ??= new Dictionary<string, string>();
+        settings.CharacterNames[selected] = nameInput;
+      }
+
+      try
+      {
+        new SettingsManager().Save(settings);
+        WriteSuccess("Character selection saved.");
+      }
+      catch (Exception ex)
+      {
+        WriteError($"Failed to save settings: {ex.Message}");
+      }
+      Pause();
+    }
+
+    private static void ShowRealmSelectMenu(AppSettings settings)
+    {
+      if (string.IsNullOrWhiteSpace(settings.FolderPath))
+      {
+        WriteError("Folder path not set. Set it on home screen.");
+        Pause();
+        return;
+      }
+
+      var list = ScanGuids(settings.FolderPath!, "Realm");
+      Console.Clear();
+      DrawHeader("=== Select Realm ===", ConsoleColor.Blue);
+      if (list.Count == 0)
+      {
+        WriteWarn("No Realm GUIDs found in filenames.");
+        Pause();
+        return;
+      }
+
+      for (int i = 0; i < list.Count; i++)
+      {
+        var guid = list[i];
+        var name = settings.RealmNames != null && settings.RealmNames.TryGetValue(guid, out var n) ? n : null;
+        Console.WriteLine($"{i + 1}. {(name is not null ? name + " - " : string.Empty)}{guid}");
+      }
+      Console.WriteLine();
+      Console.Write("Enter number to select (or blank to cancel): ");
+      var input = Console.ReadLine()?.Trim();
+      if (string.IsNullOrWhiteSpace(input)) return;
+      if (!int.TryParse(input, out var idx) || idx < 1 || idx > list.Count)
+      {
+        WriteError("Invalid selection.");
+        Pause();
+        return;
+      }
+      var selected = list[idx - 1];
+      settings.RealmGuid = selected;
+
+      Console.Write("Name? (optional, leave blank to skip): ");
+      var nameInput = Console.ReadLine()?.Trim();
+      if (!string.IsNullOrWhiteSpace(nameInput))
+      {
+        settings.RealmNames ??= new Dictionary<string, string>();
+        settings.RealmNames[selected] = nameInput;
+      }
+
+      try
+      {
+        new SettingsManager().Save(settings);
+        WriteSuccess("Realm selection saved.");
+      }
+      catch (Exception ex)
+      {
+        WriteError($"Failed to save settings: {ex.Message}");
+      }
+      Pause();
+    }
+
+    private static List<string> ScanGuids(string workingDir, string kind)
+    {
+      var results = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+      try
+      {
+        var files = Directory.GetFiles(workingDir);
+        string pattern = kind.Equals("Character", StringComparison.OrdinalIgnoreCase)
+          ? @"Character[_\- ](?<g>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
+          : @"Realm[_\- ](?<g>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})";
+        var rx = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        foreach (var f in files)
+        {
+          var name = Path.GetFileName(f);
+          var m = rx.Match(name);
+          if (m.Success)
+          {
+            var g = m.Groups["g"].Value;
+            if (!string.IsNullOrWhiteSpace(g)) results.Add(g);
+          }
+        }
+      }
+      catch
+      {
+        // ignore scanning errors
+      }
+      return results.OrderBy(x => x).ToList();
     }
 
     private static bool ConfirmRestoreIfOld(string archiveFullPath)
@@ -636,105 +873,6 @@ namespace Duplicator
         // If we can't read file info, proceed without the warning
       }
       return true;
-    }
-
-    private static string GetCharacterGuid(AppSettings settings)
-    {
-      return string.IsNullOrWhiteSpace(settings.CharacterGuid) ? CharacterGuid : settings.CharacterGuid!;
-    }
-
-    private static string GetRealmGuid(AppSettings settings)
-    {
-      return string.IsNullOrWhiteSpace(settings.RealmGuid) ? RealmGuid : settings.RealmGuid!;
-    }
-
-    private static void ShowConfigMenu(SettingsManager settingsManager, AppSettings settings)
-    {
-      while (true)
-      {
-        Console.Clear();
-        DrawHeader("=== Update Config ===", null);
-        DrawLineAt(GetRowForFKey(ConsoleKey.F9), "F9 - Back to Home");
-        DrawLineAt(GetRowForFKey(ConsoleKey.F10), "F10 - Update Character GUID");
-        DrawLineAt(GetRowForFKey(ConsoleKey.F11), "F11 - Update Realm GUID");
-        DrawLineAt(GetRowForFKey(ConsoleKey.F12), "F12 - Update Folder Path");
-
-        var key = Console.ReadKey(intercept: true);
-        switch (key.Key)
-        {
-          case ConsoleKey.F9:
-            return; // back to home
-          case ConsoleKey.F10:
-            UpdateCharacterGuidScreen(settingsManager, settings);
-            break;
-          case ConsoleKey.F11:
-            UpdateRealmGuidScreen(settingsManager, settings);
-            break;
-          case ConsoleKey.F12:
-            UpdateFolderPathScreen(settingsManager, settings);
-            break;
-          default:
-            break;
-        }
-      }
-    }
-
-    private static void UpdateCharacterGuidScreen(SettingsManager settingsManager, AppSettings settings)
-    {
-      Console.Clear();
-      Console.WriteLine("=== Update Character GUID ===");
-      Console.WriteLine();
-      Console.WriteLine($"Current: {settings.CharacterGuid ?? "<not set>"}");
-      Console.Write("New GUID (leave blank to cancel): ");
-
-      var input = Console.ReadLine()?.Trim() ?? string.Empty;
-      if (string.IsNullOrWhiteSpace(input))
-      {
-        WriteInfo("No changes made.");
-        Pause();
-        return;
-      }
-
-      settings.CharacterGuid = input;
-      try
-      {
-        settingsManager.Save(settings);
-        WriteSuccess("Character GUID saved.");
-      }
-      catch (Exception ex)
-      {
-        WriteError($"Failed to save settings: {ex.Message}");
-      }
-      Pause();
-    }
-
-    private static void UpdateRealmGuidScreen(SettingsManager settingsManager, AppSettings settings)
-    {
-      Console.Clear();
-      Console.WriteLine("=== Update Realm GUID ===");
-      Console.WriteLine();
-      Console.WriteLine($"Current: {settings.RealmGuid ?? "<not set>"}");
-      Console.Write("New GUID (leave blank to cancel): ");
-
-      var input = Console.ReadLine()?.Trim() ?? string.Empty;
-      if (string.IsNullOrWhiteSpace(input))
-      {
-        WriteInfo("No changes made.");
-        Pause();
-        return;
-      }
-
-      settings.RealmGuid = input;
-      try
-      {
-        settingsManager.Save(settings);
-        WriteSuccess("Realm GUID saved.");
-      }
-      catch (Exception ex)
-      {
-        WriteError($"Failed to save settings: {ex.Message}");
-      }
-      Pause();
     }
   }
 }
