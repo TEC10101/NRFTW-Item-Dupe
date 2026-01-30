@@ -1,1 +1,5 @@
 Duplicator/obj/**
+
+# Ignore build outputs
+bin/
+obj/
