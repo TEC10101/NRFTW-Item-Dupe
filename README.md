@@ -5,7 +5,7 @@ Small Windows console tool to duplicate/backup No Rest For The Wicked (NRFTW) ch
 ## Requirements
 
 - Windows (tested on Windows 10/11).
-- .NET runtime: the project targets `net7.0`. Either publish self-contained or install the matching .NET runtime on the target machine.
+- .NET runtime: the project targets `net10.0`. Either publish self-contained or install the matching .NET runtime on the target machine.
 - WinRAR (or change the code to use another archiver). Common install paths the app expects:
   - `C:\Program Files\WinRAR\WinRAR.exe`
   - `C:\Program Files (x86)\WinRAR\WinRAR.exe`
@@ -27,7 +27,7 @@ From the `Duplicator` project folder run:
 dotnet build -c Release
 ```
 
-The compiled binary will be at `bin\Release\net7.0\Duplicator.dll` (framework-dependent) or use `dotnet publish` to create a platform-specific EXE.
+The compiled binary will be at `bin\Release\net10.0\Duplicator.dll` (framework-dependent) or use `dotnet publish` to create a platform-specific EXE.
 
 ## Publish (single-file Windows EXE)
 
@@ -50,7 +50,7 @@ Run from a terminal to see console output:
 Or run the framework-dependent build with:
 
 ```powershell
-dotnet bin\Release\net7.0\Duplicator.dll
+dotnet bin\Release\net10.0\Duplicator.dll
 ```
 
 ## Versioning
