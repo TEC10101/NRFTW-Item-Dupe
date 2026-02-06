@@ -3,3 +3,5 @@ Duplicator/obj/**
 # Ignore build outputs
 bin/
 obj/
+.vs/
+**/.vs/
