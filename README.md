@@ -4,12 +4,9 @@ Small Windows console tool to duplicate/backup No Rest For The Wicked (NRFTW) ch
 
 ## Requirements
 
-- Windows (tested on Windows 10/11).
-- .NET runtime: the project targets `net10.0`. Either publish self-contained or install the matching .NET runtime on the target machine.
 - WinRAR (or change the code to use another archiver). Common install paths the app expects:
   - `C:\Program Files\WinRAR\WinRAR.exe`
   - `C:\Program Files (x86)\WinRAR\WinRAR.exe`
-- Read/write access to the game `DataStore` folder.
 
 ## Game data location
 
@@ -17,7 +14,17 @@ By default the game stores data under:
 
 `%USERPROFILE%\AppData\LocalLow\Moon Studios\NoRestForTheWicked\DataStore`
 
-Set the folder path inside the app (press `F9`) if the location differs.
+## FAQ
+#### Q: Is there a step by step guide to how to get it to work?
+#### A: Nope.
+>It's not complicated you just need to look and see it.  If you're worried, make a new realm and character and you'll see how it works.
+>You have character save data and you have realm save data it's all in AppData/LocalLow/Moon Studios/NoRestForTheWicked/DataStore
+>
+>You can manually copy and backup your character save file, log in and transfer items off your character, then log out and restore your files, and when you log back in your character will have the stuff they had on them again + of course it'll be in the stash too (that's the difference between the "realm" and the "character" save data).  Just log in and out and then sort the folder by time most recently modified to see what files are for what.
+>
+>The tool just assists in the backup and restoration of the save data using WinRAR.
+>
+>If you prefer, you anxious fuck, just manually backup the AppData/LocalLow/Moon Studios/NoRestForTheWicked/DataStore Then you do whatever you want (including uninstalling and reinstalling probably) and if you fuck something up just copy it back into place.
 
 ## Build (from repo)
 
