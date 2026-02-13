@@ -28,7 +28,7 @@ By default the game stores data under:
 
 ## Run
 
-A pre-build exe is located here:
+A pre-built exe is located here:
 
 ```powershell
 .\publish\Duplicator.exe
